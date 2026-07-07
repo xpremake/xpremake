@@ -58,6 +58,9 @@
 			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
 			AARCH64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
+		characterset = {
+			Unicode = function (cfg) return iif(cfg.system == p.WINDOWS, { "-D_UNICODE", "-DUNICODE", "-municode" }, {}) end,
+		},
 		fatalwarnings = {
 			All = "-Werror",
 		},
@@ -564,6 +567,9 @@
 			x86_64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch x86_64", "-m64") end,
 			AARCH64 = function (cfg) return iif(cfg.system == p.MACOSX, "-arch arm64", nil) end,
 		},
+		characterset = {
+			Unicode = function (cfg) return iif(cfg.system == p.WINDOWS, { "-municode" }, {}) end,
+		},
 		linkerfatalwarnings = {
 			All = "-Wl,--fatal-warnings",
 		},
@@ -710,7 +716,7 @@
 
 		if not systemonly then
 			if cfg.userelativelinks == p.ON then
-				local libFiles = config.getlinks(cfg, "siblings", "basename")
+				local libFiles = config.getlinks(cfg, "siblings", "basename", nil, true)
 				for _, link in ipairs(libFiles) do
 					if string.startswith(link, "lib") then
 						link = link:sub(4)
@@ -721,12 +727,12 @@
 				-- Don't use the -l form for sibling libraries, since they may have
 				-- custom prefixes or extensions that will confuse the linker. Instead
 				-- just list out the full relative path to the library.
-				result = config.getlinks(cfg, "siblings", "fullpath")
+				result = config.getlinks(cfg, "siblings", "fullpath", nil, true)
 			end
 		end
 
 		-- The "-l" flag is fine for system libraries
-		local links = config.getlinks(cfg, "system", "fullpath")
+		local links = config.getlinks(cfg, "system", "fullpath", nil, true)
 		local static_syslibs = {"-Wl,-Bstatic"}
 		local shared_syslibs = {}
 
@@ -823,4 +829,21 @@
 
 	function gcc.gettooloutputext(tool)
 		return iif(tool == "rc", ".res", ".o")
+	end
+
+	function gcc.gettoolflags(cfg, tool, input, output, depfile)
+		if tool == "rc" then
+			return string.format('%s -O coff -o %s', input, output)
+		end
+		return string.format('-o %s -MF %s -c %s', output, depfile, input)
+	end
+
+	function gcc.getlinkcommand(cfg, linker, output, objects, resources, ldflags, libs)
+		if cfg.kind == p.STATICLIB then
+			if cfg.architecture == p.UNIVERSAL then
+				return string.format('libtool -o %s %s', output, objects)
+			end
+			return string.format('%s -rcs %s %s', linker, output, objects)
+		end
+		return string.format('%s -o %s %s %s %s %s', linker, output, objects, resources, ldflags, libs)
 	end

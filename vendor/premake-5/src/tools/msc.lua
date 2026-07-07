@@ -138,8 +138,6 @@
 			On = "/Zl",
 		},
 		staticruntime = {
-			-- this option must always be emit (does it??)
-			_ = function(cfg) return getRuntimeFlag(cfg, false) end,
 			-- runtime defaults to dynamic in VS
 			Default = function(cfg) return getRuntimeFlag(cfg, false) end,
 			On = function(cfg) return getRuntimeFlag(cfg, true) end,
@@ -305,6 +303,11 @@
 		end)
 
 		return result
+	end
+
+	function msc.getpch(cfg)
+		-- TODO: Add support for MSC precompiled headers in gmake
+		return nil
 	end
 
 	function msc.getrunpathdirs()
@@ -478,11 +481,11 @@
 
 		-- If we need sibling projects to be listed explicitly, grab them first
 		if not systemonly then
-			links = config.getlinks(cfg, "siblings", "fullpath")
+			links = config.getlinks(cfg, "siblings", "fullpath", nil, true)
 		end
 
 		-- Then the system libraries, which come undecorated
-		local system = config.getlinks(cfg, "system", "fullpath")
+		local system = config.getlinks(cfg, "system", "fullpath", nil, true)
 		for i = 1, #system do
 			-- Add extension if required
 			local link = system[i]
@@ -534,6 +537,22 @@
 
 	function msc.gettooloutputext(tool)
 		return iif(tool == "rc", ".res", ".obj")
+	end
+
+	function msc.gettoolflags(cfg, tool, input, output, depfile)
+		if tool == "rc" then
+			return string.format('/nologo /fo%s %s', output, input)
+		end
+		local lang = iif(tool == "cc", "/Tc", "/Tp")
+		return string.format('/nologo /Fo%s /c %s%s', output, lang, input)
+	end
+
+	function msc.getlinkcommand(cfg, linker, output, objects, resources, ldflags, libs)
+		if cfg.kind == p.STATICLIB then
+			return string.format('%s /nologo /OUT:%s %s', linker, output, objects)
+		end
+		local shared = iif(cfg.kind == p.SHAREDLIB, " /LD", "")
+		return string.format('%s%s /nologo /Fe%s %s %s %s /link %s', linker, shared, output, objects, resources, libs, ldflags)
 	end
 
 

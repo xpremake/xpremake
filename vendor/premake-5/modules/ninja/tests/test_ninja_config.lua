@@ -66,8 +66,7 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD
-cxxflags_MyProject_Debug = /MD /EHsc
+cxxflags_MyProject_Debug = /EHsc
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -134,8 +133,8 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD /D"DEBUG" /D"PLATFORM_WINDOWS"
-cxxflags_MyProject_Debug = /MD /EHsc /D"DEBUG" /D"PLATFORM_WINDOWS"
+cflags_MyProject_Debug = /D"DEBUG" /D"PLATFORM_WINDOWS"
+cxxflags_MyProject_Debug = /EHsc /D"DEBUG" /D"PLATFORM_WINDOWS"
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -178,8 +177,8 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD /D"HELLO=\"HELLO WORLD\""
-cxxflags_MyProject_Debug = /MD /EHsc /D"HELLO=\"HELLO WORLD\""
+cflags_MyProject_Debug = /D"HELLO=\"HELLO WORLD\""
+cxxflags_MyProject_Debug = /EHsc /D"HELLO=\"HELLO WORLD\""
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -200,8 +199,8 @@ target_MyProject_Debug = MyProject.exe
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD /D"VALUE=with_paren()"
-cxxflags_MyProject_Debug = /MD /EHsc /D"VALUE=with_paren()"
+cflags_MyProject_Debug = /D"VALUE=with_paren()"
+cxxflags_MyProject_Debug = /EHsc /D"VALUE=with_paren()"
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -248,8 +247,8 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD /Iinclude /Iexternal
-cxxflags_MyProject_Debug = /MD /EHsc /Iinclude /Iexternal
+cflags_MyProject_Debug = /Iinclude /Iexternal
+cxxflags_MyProject_Debug = /EHsc /Iinclude /Iexternal
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -316,8 +315,7 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD
-cxxflags_MyProject_Debug = /MD /EHsc
+cxxflags_MyProject_Debug = /EHsc
 ldflags_MyProject_Debug = /NOLOGO /LIBPATH:"lib" /LIBPATH:"external/lib"
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -371,6 +369,27 @@ target_MyProject_Debug = MyProject
 		]]
 	end
 
+	function suite.configVars_withWholeArchiveAndLinks_Linux()
+		toolset "gcc"
+		_OS = "Linux"
+		kind "ConsoleApp"
+		files { "main.cpp" }
+		links { "m", "pthread" }
+		wholearchive { "m" }
+
+		local cfg = prepare()
+		cpp.configurationVariables(cfg)
+
+		test.capture [[
+ldflags_MyProject_Debug = -s -Wl,--whole-archive m -Wl,--no-whole-archive
+links_MyProject_Debug = -lpthread
+objdir_MyProject_Debug = obj/Debug
+targetdir_MyProject_Debug = bin/Debug
+target_MyProject_Debug = MyProject
+
+		]]
+	end
+
 
 	function suite.configVars_withLinks_Windows()
 		toolset "msc"
@@ -383,8 +402,7 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD
-cxxflags_MyProject_Debug = /MD /EHsc
+cxxflags_MyProject_Debug = /EHsc
 ldflags_MyProject_Debug = /NOLOGO
 links_MyProject_Debug = User32.lib Gdi32.lib
 objdir_MyProject_Debug = obj/Debug
@@ -453,8 +471,8 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD /W4 /WX
-cxxflags_MyProject_Debug = /MD /EHsc /W4 /WX
+cflags_MyProject_Debug = /W4 /WX
+cxxflags_MyProject_Debug = /EHsc /W4 /WX
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -523,8 +541,8 @@ target_MyProject_Debug = MyProject
 		cpp.configurationVariables(cfg)
 
 		test.capture [[
-cflags_MyProject_Debug = /MD /U"NDEBUG" /U"OLD_PLATFORM"
-cxxflags_MyProject_Debug = /MD /EHsc /U"NDEBUG" /U"OLD_PLATFORM"
+cflags_MyProject_Debug = /U"NDEBUG" /U"OLD_PLATFORM"
+cxxflags_MyProject_Debug = /EHsc /U"NDEBUG" /U"OLD_PLATFORM"
 ldflags_MyProject_Debug = /NOLOGO
 objdir_MyProject_Debug = obj/Debug
 targetdir_MyProject_Debug = bin/Debug
@@ -652,7 +670,7 @@ target_MyProject_Debug = MyProject
 		test.isnotnil(result)
 		test.capture [[
 build obj/Debug/MyProject.prebuild: prebuild
-  prebuildcommands = cmd /C "echo Building && type nul >> \"obj\Debug\MyProject.prebuild\" && copy /b \"obj\Debug\MyProject.prebuild\"+,, \"obj\Debug\MyProject.prebuild\""
+  prebuildcommands = cmd /C "echo Building && type nul >> ^"obj\Debug\MyProject.prebuild^" && copy /b ^"obj\Debug\MyProject.prebuild^"+,, ^"obj\Debug\MyProject.prebuild^""
 		]]
 	end
 
@@ -695,7 +713,7 @@ function suite.prebuildEvents_onMessage_Windows()
 		test.isnotnil(result)
 		test.capture [[
 build obj/Debug/MyProject.prebuild: prebuild
-  prebuildcommands = cmd /C "echo \"Building project\" && type nul >> \"obj\Debug\MyProject.prebuild\" && copy /b \"obj\Debug\MyProject.prebuild\"+,, \"obj\Debug\MyProject.prebuild\""
+  prebuildcommands = cmd /C "echo ^"Building project^" && type nul >> ^"obj\Debug\MyProject.prebuild^" && copy /b ^"obj\Debug\MyProject.prebuild^"+,, ^"obj\Debug\MyProject.prebuild^""
 		]]
 	end
 
@@ -740,7 +758,7 @@ build obj/Debug/MyProject.prebuild: prebuild
 		test.isnotnil(result)
 		test.capture [[
 build obj/Debug/MyProject.prebuild: prebuild
-  prebuildcommands = cmd /C "echo \"Building project\" && mkdir -p build && cp file.txt build/ && type nul >> \"obj\Debug\MyProject.prebuild\" && copy /b \"obj\Debug\MyProject.prebuild\"+,, \"obj\Debug\MyProject.prebuild\""
+  prebuildcommands = cmd /C "echo ^"Building project^" && mkdir -p build && cp file.txt build/ && type nul >> ^"obj\Debug\MyProject.prebuild^" && copy /b ^"obj\Debug\MyProject.prebuild^"+,, ^"obj\Debug\MyProject.prebuild^""
 		]]
 	end
 
@@ -806,7 +824,7 @@ build obj/Debug/MyProject.prebuild: prebuild
 		test.isnotnil(result)
 		test.capture [[
 build obj/Debug/MyProject.prelinkevents: prelink obj/Debug/main.o
-  prelinkcommands = cmd /C "echo Linking && type nul >> \"obj\Debug\MyProject.prelinkevents\" && copy /b \"obj\Debug\MyProject.prelinkevents\"+,, \"obj\Debug\MyProject.prelinkevents\""
+  prelinkcommands = cmd /C "echo Linking && type nul >> ^"obj\Debug\MyProject.prelinkevents^" && copy /b ^"obj\Debug\MyProject.prelinkevents^"+,, ^"obj\Debug\MyProject.prelinkevents^""
 		]]
 	end
 
@@ -852,7 +870,7 @@ build obj/Debug/MyProject.prelinkevents: prelink obj/Debug/main.o
 		test.isnotnil(result)
 		test.capture [[
 build obj/Debug/MyProject.prelinkevents: prelink obj/Debug/main.o
-  prelinkcommands = cmd /C "echo \"Linking project\" && type nul >> \"obj\Debug\MyProject.prelinkevents\" && copy /b \"obj\Debug\MyProject.prelinkevents\"+,, \"obj\Debug\MyProject.prelinkevents\""
+  prelinkcommands = cmd /C "echo ^"Linking project^" && type nul >> ^"obj\Debug\MyProject.prelinkevents^" && copy /b ^"obj\Debug\MyProject.prelinkevents^"+,, ^"obj\Debug\MyProject.prelinkevents^""
 		]]
 	end
 
@@ -898,7 +916,7 @@ build obj/Debug/MyProject.prelinkevents: prelink obj/Debug/main.o
 		test.isnotnil(result)
 		test.capture [[
 build obj/Debug/MyProject.prelinkevents: prelink obj/Debug/main.o
-  prelinkcommands = cmd /C "echo \"Preparing link\" && echo prelinking && ls -la && type nul >> \"obj\Debug\MyProject.prelinkevents\" && copy /b \"obj\Debug\MyProject.prelinkevents\"+,, \"obj\Debug\MyProject.prelinkevents\""
+  prelinkcommands = cmd /C "echo ^"Preparing link^" && echo prelinking && ls -la && type nul >> ^"obj\Debug\MyProject.prelinkevents^" && copy /b ^"obj\Debug\MyProject.prelinkevents^"+,, ^"obj\Debug\MyProject.prelinkevents^""
 		]]
 	end
 
@@ -984,7 +1002,7 @@ build obj/Debug/MyProject.prelinkevents: prelink obj/Debug/main.o obj/Debug/foo.
 
 		test.capture [[
 build obj/Debug/MyProject.postbuild: postbuild | bin/Debug/MyProject
-  postbuildcommands = cmd /C "echo Done && type nul >> \"obj\Debug\MyProject.postbuild\" && copy /b \"obj\Debug\MyProject.postbuild\"+,, \"obj\Debug\MyProject.postbuild\""
+  postbuildcommands = cmd /C "echo Done && type nul >> ^"obj\Debug\MyProject.postbuild^" && copy /b ^"obj\Debug\MyProject.postbuild^"+,, ^"obj\Debug\MyProject.postbuild^""
 		]]
 	end
 
@@ -1024,7 +1042,7 @@ build obj/Debug/MyProject.postbuild: postbuild | bin/Debug/MyProject
 
 		test.capture [[
 build obj/Debug/MyProject.postbuild: postbuild | bin/Debug/MyProject
-  postbuildcommands = cmd /C "echo \"Build complete\" && type nul >> \"obj\Debug\MyProject.postbuild\" && copy /b \"obj\Debug\MyProject.postbuild\"+,, \"obj\Debug\MyProject.postbuild\""
+  postbuildcommands = cmd /C "echo ^"Build complete^" && type nul >> ^"obj\Debug\MyProject.postbuild^" && copy /b ^"obj\Debug\MyProject.postbuild^"+,, ^"obj\Debug\MyProject.postbuild^""
 		]]
 	end
 
@@ -1066,7 +1084,7 @@ build obj/Debug/MyProject.postbuild: postbuild | bin/Debug/MyProject
 
 		test.capture [[
 build obj/Debug/MyProject.postbuild: postbuild | bin/Debug/MyProject
-  postbuildcommands = cmd /C "echo \"Finishing build\" && cp bin/Debug/MyProject /usr/local/bin/ && chmod +x /usr/local/bin/MyProject && type nul >> \"obj\Debug\MyProject.postbuild\" && copy /b \"obj\Debug\MyProject.postbuild\"+,, \"obj\Debug\MyProject.postbuild\""
+  postbuildcommands = cmd /C "echo ^"Finishing build^" && cp bin/Debug/MyProject /usr/local/bin/ && chmod +x /usr/local/bin/MyProject && type nul >> ^"obj\Debug\MyProject.postbuild^" && copy /b ^"obj\Debug\MyProject.postbuild^"+,, ^"obj\Debug\MyProject.postbuild^""
 		]]
 	end
 

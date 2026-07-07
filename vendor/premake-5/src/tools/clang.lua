@@ -44,6 +44,7 @@
 
 	clang.shared = {
 		architecture = gcc.shared.architecture,
+		characterset = gcc.shared.characterset,
 		fatalwarnings = {
 			All = "-Werror"
 		},
@@ -264,6 +265,7 @@
 			WASM32 = "-m32",
 			WASM64 = "-m64",
 		}),
+		characterset = gcc.ldflags.characterset,
 		linkerfatalwarnings = {
 			All = "-Wl,--fatal-warnings",
 		},
@@ -401,4 +403,12 @@
 
 	function clang.gettooloutputext(tool)
 		return gcc.gettooloutputext(tool)
+	end
+
+	function clang.gettoolflags(cfg, tool, input, output, depfile)
+		return gcc.gettoolflags(cfg, tool, input, output, depfile)
+	end
+
+	function clang.getlinkcommand(cfg, linker, output, objects, resources, ldflags, libs)
+		return gcc.getlinkcommand(cfg, linker, output, objects, resources, ldflags, libs)
 	end
